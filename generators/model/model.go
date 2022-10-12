@@ -17,6 +17,9 @@ type TemplatePackage struct {
 	Imports    []string
 
 	Entities []TemplateEntity
+
+	ORMNeeded   bool
+	ORMDbStruct string
 }
 
 // NewTemplatePackage creates a package for template
@@ -38,7 +41,9 @@ func NewTemplatePackage(entities []model.Entity, options Options) TemplatePackag
 		HasImports: imports.Len() > 0,
 		Imports:    imports.Elements(),
 
-		Entities: models,
+		Entities:    models,
+		ORMNeeded:   options.GenORM,
+		ORMDbStruct: options.DBWrapName,
 	}
 }
 

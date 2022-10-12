@@ -17,6 +17,8 @@ func TestGenerator_Generate(t *testing.T) {
 	generator.options.URL = `postgres://some_user:some_password@localhost:5432/some_db?sslmode=disable`
 	generator.options.Output = path.Join(os.TempDir(), "model_test.go")
 	generator.options.FollowFKs = true
+	generator.options.GenORM = true
+	generator.options.DBWrapName = "MyCustomWrapper"
 	generator.options.CustomTypes.Add(model.TypePGUuid, "uuid.UUID", "github.com/google/uuid")
 	//generator.options.AddJSONTag = true
 

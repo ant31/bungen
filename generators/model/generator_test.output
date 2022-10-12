@@ -115,3 +115,57 @@ type GeoCountry struct {
 	Code   string `bun:"code,nullzero"`
 	Coords []int  `bun:"coords,array"`
 }
+
+/* Common ORM queries */
+
+// Just a wrapper around database connection
+type MyCustomWrapper struct {
+	*bun.DB
+}
+
+/* 'SELECT' queries */
+func (dbConn *MyCustomWrapper) SelectProject() ([]*Project, error) {
+	ctx := context.Background()
+	model := []*Project{}
+
+	err := dbConn.NewSelect().
+		Column("t.projectId").
+		Column("t.code").
+		Column("t.name").
+		Model(&model).
+		Scan(ctx)
+	return model, err
+}
+
+func (dbConn *MyCustomWrapper) SelectUser() ([]*User, error) {
+	ctx := context.Background()
+	model := []*User{}
+
+	err := dbConn.NewSelect().
+		Column("t.userId").
+		Column("t.email").
+		Column("t.activated").
+		Column("t.name").
+		Column("t.countryId").
+		Column("t.avatar").
+		Column("t.avatarAlt").
+		Column("t.apiKeys").
+		Column("t.loggedAt").
+		Model(&model).
+		Scan(ctx)
+	return model, err
+}
+
+func (dbConn *MyCustomWrapper) SelectGeoCountry() ([]*GeoCountry, error) {
+	ctx := context.Background()
+	model := []*GeoCountry{}
+
+	err := dbConn.NewSelect().
+		Column("t.countryId").
+		Column("t.code").
+		Column("t.coords").
+		Model(&model).
+		Scan(ctx)
+	return model, err
+}
+
