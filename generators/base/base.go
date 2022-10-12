@@ -37,6 +37,10 @@ const (
 
 	// custom types flag
 	customTypesFlag = "custom-types"
+
+	// generate simple ORM queries
+	genORM = "gen-orm"
+	dbWrap = "db-wrap"
 )
 
 // Gen is interface for all generators
@@ -69,6 +73,12 @@ type Options struct {
 
 	// Custom types goes here
 	CustomTypes model.CustomTypeMapping
+
+	// Generate basic ORM queries
+	GenORM bool
+
+	// Struct name for ORM queries. Works only when GenORM == true
+	DBWrapName string
 }
 
 // Def sets default options if empty
@@ -117,11 +127,14 @@ func AddFlags(command *cobra.Command) {
 
 	flags.StringSlice(customTypesFlag, []string{}, "set custom types separated by comma\nformat: <postgresql_type>:<go_import>.<go_type>\nexamples: uuid:github.com/google/uuid.UUID,point:src/model.Point,bytea:string\n")
 
+	flags.BoolP(genORM, "q", false, "generate basic ORM queries")
+	flags.StringP(dbWrap, "z", "DatabaseWrap", "name of structs for wrapping ORM queries (works only with flag -q, --gen-orm)")
+
 	return
 }
 
 // ReadFlags reads basic flags from command
-func ReadFlags(command *cobra.Command) (conn, output, pkg string, tables []string, followFKs bool, customTypes model.CustomTypeMapping, err error) {
+func ReadFlags(command *cobra.Command) (conn, output, pkg string, tables []string, followFKs bool, genOrm bool, dbWrapName string, customTypes model.CustomTypeMapping, err error) {
 	var customTypesStrings []string
 	uuid := false
 
@@ -148,6 +161,13 @@ func ReadFlags(command *cobra.Command) (conn, output, pkg string, tables []strin
 	}
 
 	if followFKs, err = flags.GetBool(FollowFKs); err != nil {
+		return
+	}
+
+	if genOrm, err = flags.GetBool(genORM); err != nil {
+		return
+	}
+	if dbWrapName, err = flags.GetString(dbWrap); err != nil {
 		return
 	}
 

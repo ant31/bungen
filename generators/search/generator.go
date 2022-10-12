@@ -58,7 +58,7 @@ func (g *Search) AddFlags(command *cobra.Command) {
 func (g *Search) ReadFlags(command *cobra.Command) error {
 	var err error
 
-	g.options.URL, g.options.Output, g.options.Package, g.options.Tables, g.options.FollowFKs, g.options.CustomTypes, err = base.ReadFlags(command)
+	g.options.URL, g.options.Output, g.options.Package, g.options.Tables, g.options.FollowFKs, _, _, g.options.CustomTypes, err = base.ReadFlags(command)
 	if err != nil {
 		return err
 	}
