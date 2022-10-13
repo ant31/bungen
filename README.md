@@ -23,7 +23,7 @@ In most of the cases Bun [Postgres driver] models represent database's tables an
 1. Read though help `bungen -h`
 
 Currently bungen support 3 generators:
-- [model](generators/model/README.md), that generates basic Bun [Postgres driver] model
+- [model](generators/model/README.md), that generates basic Bun [Postgres driver] model (with provided `-q` and `-z` flags it is possible to create simple `SELECT *` functions)
 - [model-named](generators/named/README.md), same as basic but with named structs for columns and tables (author: [@Dionid](https://github.com/Dionid))
 - [search](generators/search/README.md), that generates search structs for basic model
 - [validation](generators/validate/README.md), that generates validate functions for basic model
