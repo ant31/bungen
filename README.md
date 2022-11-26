@@ -1,4 +1,5 @@
 # Bungen - cli tool for generating Bun [Postgres driver] models
+Forked from: https://github.com/LdDl/bungen
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/bungen)](https://goreportcard.com/report/github.com/LdDl/bungen)
 
