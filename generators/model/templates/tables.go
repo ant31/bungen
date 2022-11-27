@@ -1,6 +1,6 @@
-package model
+package templates
 
-const TemplateTable = `//nolint
+const Tables = `//nolint
 //lint:file-ignore U1000 ignore unused code, it's generated
 package {{.Package}}{{if .HasImports}}
 
@@ -22,7 +22,8 @@ var Columns = ColumnsSt{ {{range .Entities}}
 		{{.GoName}}: "{{.PGName}}",{{end}}{{if .HasRelations}}
 		{{range .Relations}}
 		{{.GoName}}: "{{.GoName}}",{{end}}{{end}}
-	},{{end}}
+	},
+{{end}}
 }
 
 type TableInfo struct {
@@ -56,4 +57,7 @@ type TablesSt struct { {{range .Entities}}
 
 var Tables = TablesSt { {{range .Entities}}
 	{{.GoName}}: {{.GoName}}T,{{end}}
-}`
+}
+
+var T = Tables
+`

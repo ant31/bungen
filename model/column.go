@@ -14,7 +14,8 @@ type Column struct {
 	GoName string
 	PGName string
 
-	Type string
+	Type       string
+	SearchType string
 
 	GoType string
 	PGType string

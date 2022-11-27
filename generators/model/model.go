@@ -18,8 +18,10 @@ type TemplatePackage struct {
 
 	Entities []TemplateEntity
 
-	ORMNeeded   bool
-	ORMDbStruct string
+	WithORM        bool
+	WithSearch     bool
+	WithValidation bool
+	ORMDbStruct    string
 }
 
 // NewTemplatePackage creates a package for template
@@ -41,9 +43,11 @@ func NewTemplatePackage(entities []model.Entity, options Options) TemplatePackag
 		HasImports: imports.Len() > 0,
 		Imports:    imports.Elements(),
 
-		Entities:    models,
-		ORMNeeded:   options.GenORM,
-		ORMDbStruct: options.DBWrapName,
+		Entities:       models,
+		WithORM:        options.WithORM,
+		ORMDbStruct:    options.DBWrapName,
+		WithValidation: options.WithValidation,
+		WithSearch:     options.WithSearch,
 	}
 }
 
@@ -60,6 +64,7 @@ type TemplateEntity struct {
 
 	HasRelations bool
 	Relations    []TemplateRelation
+	Imports      []string
 }
 
 // NewTemplateEntity creates an entity for template
@@ -67,10 +72,13 @@ func NewTemplateEntity(entity model.Entity, options Options) TemplateEntity {
 	if entity.HasMultiplePKs() {
 		options.KeepPK = true
 	}
-
+	imports := util.NewSet()
 	columns := make([]TemplateColumn, len(entity.Columns))
 	for i, column := range entity.Columns {
 		columns[i] = NewTemplateColumn(entity, column, options)
+		if columns[i].Import != "" {
+			imports.Add(column.Import)
+		}
 	}
 
 	relations := make([]TemplateRelation, 0, len(entity.Relations))
@@ -119,6 +127,11 @@ type TemplateColumn struct {
 
 	Tag     template.HTML
 	Comment template.HTML
+	Relaxed bool
+
+	HasTags         bool
+	UseCustomRender bool
+	CustomRender    template.HTML
 }
 
 // NewTemplateColumn creates a column for template
@@ -138,6 +151,12 @@ func NewTemplateColumn(entity model.Entity, column model.Column, options Options
 	tags := util.NewAnnotation()
 	tags.AddTag(tagName, column.PGName)
 
+	if options.Relaxed {
+		column.SearchType = model.TypeInterface
+	} else {
+		column.SearchType = fmt.Sprintf("*%s", column.GoType)
+	}
+
 	// pk tag
 	if column.IsPK {
 		tags.AddTag(tagName, "pk")
@@ -150,9 +169,13 @@ func NewTemplateColumn(entity model.Entity, column model.Column, options Options
 		tags.AddTag(tagName, "array")
 	}
 	if column.PGType == model.TypePGUuid {
+		if column.IsPK {
+			tags.AddTag(tagName, "notnull")
+			tags.AddTag(tagName, "default:gen_random_uuid()")
+		}
 		tags.AddTag(tagName, "type:uuid")
-	}
 
+	}
 	// nullable tag
 	if !column.Nullable && !column.IsPK {
 		tags.AddTag(tagName, "nullzero")
@@ -175,8 +198,9 @@ func NewTemplateColumn(entity model.Entity, column model.Column, options Options
 	}
 
 	return TemplateColumn{
-		Column: column,
-
+		Relaxed: options.Relaxed,
+		Column:  column,
+		HasTags: tags.Len() > 0,
 		Tag:     template.HTML(fmt.Sprintf("`%s`", tags.String())),
 		Comment: template.HTML(comment),
 	}

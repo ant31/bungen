@@ -39,8 +39,17 @@ const (
 	customTypesFlag = "custom-types"
 
 	// generate simple ORM queries
-	genORM = "gen-orm"
-	dbWrap = "db-wrap"
+	withORM        = "with-orm"
+	withValidation = "with-validation"
+	withSearch     = "with-search"
+	relaxed        = "search-relaxed"
+	dbWrap         = "db-wrap"
+	keepPK         = "keep-pk"
+	noDiscard      = "no-discard"
+	noAlias        = "no-alias"
+	softDelete     = "soft-delete"
+	json           = "json"
+	jsonTag        = "json-tag"
 )
 
 // Gen is interface for all generators
@@ -70,15 +79,44 @@ type Options struct {
 	// even if Tables not listed in Tables param
 	// will not generate fks if schema not listed
 	FollowFKs bool
+	// Package sets package name for model
+	// Works only with SchemaPackage = false
+	Package string
 
-	// Custom types goes here
-	CustomTypes model.CustomTypeMapping
+	// Do not replace primary key name to ID
+	KeepPK bool
+
+	// Soft delete column
+	SoftDelete string
+
+	// use sql.Null... instead of pointers
+	UseSQLNulls bool
+
+	// Do not generate alias tag
+	NoAlias bool
+
+	// Do not generate discard_unknown_columns tag
+	NoDiscard bool
+
+	// Override type for json/jsonb
+	JSONTypes map[string]string
+
+	// Add json tag to models
+	AddJSONTag bool
 
 	// Generate basic ORM queries
-	GenORM bool
+	WithORM bool
+	// Generate Search queries
+	WithSearch bool
+	// Generate Vallidation functions
+	WithValidation bool
+	// Strict types in filters
+	Relaxed bool
 
 	// Struct name for ORM queries. Works only when GenORM == true
 	DBWrapName string
+	// Custom types goes here
+	CustomTypes model.CustomTypeMapping
 }
 
 // Def sets default options if empty
@@ -129,47 +167,69 @@ func AddFlags(command *cobra.Command) {
 
 	flags.StringSlice(customTypesFlag, []string{}, "set custom types separated by comma\nformat: <postgresql_type>:<go_import>.<go_type>\nexamples: uuid:github.com/google/uuid.UUID,point:src/model.Point,bytea:string\n")
 
-	flags.BoolP(genORM, "q", false, "generate basic ORM queries")
-	flags.StringP(dbWrap, "z", "DatabaseWrap", "name of structs for wrapping ORM queries (works only with flag -q, --gen-orm)")
+	flags.BoolP(withORM, "q", false, "generate basic ORM queries")
+	flags.StringP(dbWrap, "z", "DBWrap", "name of structs for wrapping ORM queries (works only with flag -q, --gen-orm)")
+	flags.Bool(withSearch, false, "generate basic Search queries")
+	flags.Bool(withValidation, false, "generate model Validation methods")
+	flags.Bool(relaxed, false, "use interface{} type in search filters\n")
+	flags.BoolP(keepPK, "k", false, "keep primary key name as is (by default it should be converted to 'ID')")
+	flags.StringP(softDelete, "s", "", "field for soft_delete tag\n")
+
+	flags.BoolP(noAlias, "w", false, `do not set 'alias' tag to "t"`)
+	flags.BoolP(noDiscard, "d", false, "do not use 'discard_unknown_columns' tag\n")
+
+	flags.StringToStringP(json, "j", map[string]string{"*": "map[string]interface{}"}, "type for json columns\nuse format: table.column=type, separate by comma\nuse asterisk as wildcard in table name")
+	flags.Bool(jsonTag, false, "add json tag to annotations")
 
 	return
 }
 
 // ReadFlags reads basic flags from command
-func ReadFlags(command *cobra.Command) (conn, output, pkg string, tables []string, followFKs bool, genOrm bool, dbWrapName string, customTypes model.CustomTypeMapping, err error) {
+func ReadFlags(command *cobra.Command, o *Options) (err error) {
 	var customTypesStrings []string
 	uuid := false
 
 	flags := command.Flags()
 
-	if conn, err = flags.GetString(Conn); err != nil {
+	if o.URL, err = flags.GetString(Conn); err != nil {
 		return
 	}
 
-	if output, err = flags.GetString(Output); err != nil {
+	if o.Output, err = flags.GetString(Output); err != nil {
 		return
 	}
 
-	if pkg, err = flags.GetString(Pkg); err != nil {
+	if o.Package, err = flags.GetString(Pkg); err != nil {
 		return
 	}
 
-	if strings.Trim(pkg, " ") == "" {
-		pkg = path.Base(path.Dir(output))
+	if strings.Trim(o.Package, " ") == "" {
+		o.Package = path.Base(path.Dir(o.Output))
 	}
 
-	if tables, err = flags.GetStringSlice(Tables); err != nil {
+	if o.Tables, err = flags.GetStringSlice(Tables); err != nil {
 		return
 	}
 
-	if followFKs, err = flags.GetBool(FollowFKs); err != nil {
+	if o.FollowFKs, err = flags.GetBool(FollowFKs); err != nil {
 		return
 	}
 
-	if genOrm, err = flags.GetBool(genORM); err != nil {
+	if o.WithORM, err = flags.GetBool(withORM); err != nil {
 		return
 	}
-	if dbWrapName, err = flags.GetString(dbWrap); err != nil {
+	if o.DBWrapName, err = flags.GetString(dbWrap); err != nil {
+		return
+	}
+
+	if o.WithSearch, err = flags.GetBool(withSearch); err != nil {
+		return
+	}
+
+	if o.WithValidation, err = flags.GetBool(withValidation); err != nil {
+		return
+	}
+	if o.Relaxed, err = flags.GetBool(relaxed); err != nil {
 		return
 	}
 
@@ -177,15 +237,39 @@ func ReadFlags(command *cobra.Command) (conn, output, pkg string, tables []strin
 		return
 	}
 
-	if customTypes, err = model.ParseCustomTypes(customTypesStrings); err != nil {
+	if o.CustomTypes, err = model.ParseCustomTypes(customTypesStrings); err != nil {
 		return
 	}
 	if uuid, err = flags.GetBool(uuidFlag); err != nil {
 		return
 	}
 
-	if uuid && !customTypes.Has(model.TypePGUuid) {
-		customTypes.Add(model.TypePGUuid, "uuid.UUID", "github.com/google/uuid")
+	if uuid && !o.CustomTypes.Has(model.TypePGUuid) {
+		o.CustomTypes.Add(model.TypePGUuid, "uuid.UUID", "github.com/google/uuid")
+	}
+
+	if o.KeepPK, err = flags.GetBool(keepPK); err != nil {
+		return err
+	}
+
+	if o.SoftDelete, err = flags.GetString(softDelete); err != nil {
+		return err
+	}
+
+	if o.NoDiscard, err = flags.GetBool(noDiscard); err != nil {
+		return err
+	}
+
+	if o.NoAlias, err = flags.GetBool(noAlias); err != nil {
+		return err
+	}
+
+	if o.JSONTypes, err = flags.GetStringToString(json); err != nil {
+		return err
+	}
+
+	if o.AddJSONTag, err = flags.GetBool(jsonTag); err != nil {
+		return err
 	}
 
 	return
@@ -217,6 +301,7 @@ func (g Generator) GenerateFromEntities(entities []model.Entity, output, tmpl st
 	}
 
 	saved, err := util.FmtAndSave(buffer.Bytes(), output)
+
 	if err != nil {
 		if !saved {
 			return fmt.Errorf("saving file error: %w", err)

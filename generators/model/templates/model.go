@@ -1,18 +1,22 @@
-package model
+package templates
 
-const TemplateModel = `//nolint
+const Model = `//nolint
 //lint:file-ignore U1000 ignore unused code, it's generated
 package {{.Package}}{{if .HasImports}}
 
 import ({{range .Imports}}
     "{{.}}"{{end}}
+	{{- if .WithORM}}
+	"context"
+	{{- end}}
+	"github.com/uptrace/bun"
 ){{end}}
 
 
 {{range $model := .Entities}}
 type {{.GoName}} struct {
 	bun.BaseModel {{.Tag}}
-	
+
 	{{range .Columns}}
 	{{.GoName}} {{.Type}} {{.Tag}} {{.Comment}}{{end}}{{if .HasRelations}}
 	{{range .Relations}}
@@ -22,11 +26,7 @@ type {{.GoName}} struct {
 
 /* Common ORM queries */
 
-// Just a wrapper around database connection
-{{- if .ORMNeeded}}
-type {{ .ORMDbStruct }} struct {
-	*bun.DB
-}
+{{- if .WithORM}}
 {{$dbstruct := .}}
 /* 'SELECT' queries */
 {{- range $model := .Entities}}
@@ -45,6 +45,37 @@ func (dbConn *{{ $dbstruct.ORMDbStruct }}) Select{{ .GoName }}() ([]*{{ .GoName 
 		Model(&model).
 		Scan(ctx)
 	return model, err
+}
+{{end}}
+{{- end}}
+
+{{- if .WithSearch}}
+/* Search Queries */
+
+{{range $model := .Entities}}
+type {{.GoName}}Search struct {
+	search
+
+	{{range .Columns}}
+	{{.GoName}} {{.SearchType}}{{if .HasTags}} {{.Tag}}{{end}}{{end}}
+}
+
+func (s *{{.GoName}}Search) Apply(query bun.QueryBuilder) bun.QueryBuilder { {{range .Columns}}{{if .Relaxed}}
+	if !reflect.ValueOf(s.{{.GoName}}).IsNil(){ {{else}}
+	if s.{{.GoName}} != nil { {{end}}{{if .UseCustomRender}}
+		{{.CustomRender}}{{else}}
+		s.where(query, Tables.{{$model.GoName}}.{{if not $model.NoAlias}}Alias{{else}}Name{{end}}, Columns.{{$model.GoName}}.{{.GoName}}, s.{{.GoName}}){{end}}
+	}{{end}}
+
+	s.apply(query)
+
+	return query
+}
+
+func (s *{{.GoName}}Search) Q() applier {
+	return func(query bun.QueryBuilder) (bun.QueryBuilder, error) {
+		return s.Apply(query), nil
+	}
 }
 {{end}}
 {{- end}}

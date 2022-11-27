@@ -4,8 +4,6 @@ import (
 	"os"
 
 	"github.com/ant31/bungen/generators/model"
-	"github.com/ant31/bungen/generators/search"
-	"github.com/ant31/bungen/generators/validate"
 
 	"github.com/spf13/cobra"
 )
@@ -29,8 +27,6 @@ to quickly create a models for Bun [Postgres driver] https://github.com/uptrace/
 func init() {
 	root.AddCommand(
 		model.CreateCommand(),
-		search.CreateCommand(),
-		validate.CreateCommand(),
 	)
 }
 
