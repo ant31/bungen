@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/LdDl/bungen/model"
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/model"
+	"github.com/ant31/bungen/util"
 	"github.com/uptrace/bun"
 )
 
@@ -17,6 +17,7 @@ type Bungen struct {
 	Store *store
 
 	Logger *log.Logger
+	Name   string
 }
 
 // New creates Bungen

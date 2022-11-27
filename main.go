@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/LdDl/bungen/cmd"
+	"github.com/ant31/bungen/cmd"
 )
 
 func main() {

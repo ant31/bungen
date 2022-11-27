@@ -3,10 +3,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/LdDl/bungen/generators/model"
-	"github.com/LdDl/bungen/generators/named"
-	"github.com/LdDl/bungen/generators/search"
-	"github.com/LdDl/bungen/generators/validate"
+	"github.com/ant31/bungen/generators/model"
+	"github.com/ant31/bungen/generators/search"
+	"github.com/ant31/bungen/generators/validate"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +31,6 @@ func init() {
 		model.CreateCommand(),
 		search.CreateCommand(),
 		validate.CreateCommand(),
-		named.CreateCommand(),
 	)
 }
 

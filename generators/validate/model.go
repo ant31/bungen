@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/LdDl/bungen/model"
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/model"
+	"github.com/ant31/bungen/util"
 )
 
 const (

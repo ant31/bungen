@@ -1,8 +1,8 @@
 package validate
 
 import (
-	"github.com/LdDl/bungen/generators/base"
-	"github.com/LdDl/bungen/model"
+	"github.com/ant31/bungen/generators/base"
+	"github.com/ant31/bungen/model"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +68,7 @@ func (g *Validate) ReadFlags(command *cobra.Command) error {
 
 // Generate runs whole generation process
 func (g *Validate) Generate() error {
-	return base.NewGenerator(g.options.URL).
+	return base.NewGenerator(g.options.URL, "Validation").
 		Generate(
 			g.options.Tables,
 			g.options.FollowFKs,

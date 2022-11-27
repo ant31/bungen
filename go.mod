@@ -1,9 +1,10 @@
-module github.com/LdDl/bungen
+module github.com/ant31/bungen
 
 go 1.18
 
 require (
 	github.com/fatih/camelcase v1.0.0
+	github.com/google/uuid v1.3.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/spf13/cobra v1.1.3
 	github.com/uptrace/bun v1.1.8

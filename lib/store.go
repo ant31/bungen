@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/LdDl/bungen/model"
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/model"
+	"github.com/ant31/bungen/util"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/schema"

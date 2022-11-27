@@ -1,8 +1,11 @@
 package model
 
 import (
-	"github.com/LdDl/bungen/generators/base"
-	"github.com/LdDl/bungen/model"
+	"path/filepath"
+	"strings"
+
+	"github.com/ant31/bungen/generators/base"
+	"github.com/ant31/bungen/model"
 
 	"github.com/spf13/cobra"
 )
@@ -101,16 +104,39 @@ func (g *Basic) ReadFlags(command *cobra.Command) error {
 
 // Generate runs whole generation process
 func (g *Basic) Generate() error {
-	return base.NewGenerator(g.options.URL).
-		Generate(
-			g.options.Tables,
-			g.options.FollowFKs,
-			g.options.UseSQLNulls,
-			g.options.Output,
-			Template,
-			g.Packer(),
-			g.options.CustomTypes,
-		)
+	gen := base.NewGenerator(g.options.URL, "Tables")
+	err := gen.Generate(
+		g.options.Tables,
+		g.options.FollowFKs,
+		g.options.UseSQLNulls,
+		filepath.Join(g.options.Output, "tables.gen.go"),
+		TemplateTable,
+		g.Packer(),
+		g.options.CustomTypes,
+	)
+	if err != nil {
+		return err
+	}
+	gen = base.NewGenerator(g.options.URL, "Models")
+	entities, err := gen.Read(g.options.Tables,
+		g.options.FollowFKs,
+		g.options.UseSQLNulls,
+		g.options.CustomTypes)
+	if err != nil {
+		return err
+	}
+
+	for i, ent := range entities {
+		err = gen.GenerateFromEntities(entities[i:i+1],
+			filepath.Join(g.options.Output, strings.ToLower(ent.GoName))+".m.gen.go",
+			TemplateModel,
+			g.Packer())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+
 }
 
 // Packer returns packer function for compile entities into package

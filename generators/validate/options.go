@@ -3,8 +3,8 @@ package validate
 import (
 	"strings"
 
-	"github.com/LdDl/bungen/generators/base"
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/generators/base"
+	"github.com/ant31/bungen/util"
 )
 
 // Options for generator

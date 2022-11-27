@@ -1,8 +1,8 @@
 package search
 
 import (
-	"github.com/LdDl/bungen/generators/base"
-	"github.com/LdDl/bungen/model"
+	"github.com/ant31/bungen/generators/base"
+	"github.com/ant31/bungen/model"
 	"github.com/spf13/cobra"
 )
 
@@ -89,7 +89,7 @@ func (g *Search) ReadFlags(command *cobra.Command) error {
 
 // Generate runs whole generation process
 func (g *Search) Generate() error {
-	return base.NewGenerator(g.options.URL).
+	return base.NewGenerator(g.options.URL, "Search").
 		Generate(
 			g.options.Tables,
 			g.options.FollowFKs,
@@ -103,7 +103,7 @@ func (g *Search) Generate() error {
 
 // Repack runs generator with custom packer
 func (g *Search) Repack(packer base.Packer) error {
-	return base.NewGenerator(g.options.URL).
+	return base.NewGenerator(g.options.URL, "Search").
 		Generate(
 			g.options.Tables,
 			g.options.FollowFKs,

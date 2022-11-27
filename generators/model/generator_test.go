@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/LdDl/bungen/model"
+	"github.com/ant31/bungen/model"
 )
 
 func TestGenerator_Generate(t *testing.T) {

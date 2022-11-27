@@ -9,9 +9,9 @@ import (
 	"path"
 	"strings"
 
-	bungen "github.com/LdDl/bungen/lib"
-	"github.com/LdDl/bungen/model"
-	"github.com/LdDl/bungen/util"
+	bungen "github.com/ant31/bungen/lib"
+	"github.com/ant31/bungen/model"
+	"github.com/ant31/bungen/util"
 
 	"github.com/spf13/cobra"
 )
@@ -95,12 +95,14 @@ func (o *Options) Def() {
 // Generator is base generator used in other generators
 type Generator struct {
 	bungen.Bungen
+	Name string
 }
 
 // NewGenerator creates generator
-func NewGenerator(url string) Generator {
+func NewGenerator(url string, n string) Generator {
 	return Generator{
 		Bungen: bungen.New(url, nil),
+		Name:   n,
 	}
 }
 
@@ -221,8 +223,15 @@ func (g Generator) GenerateFromEntities(entities []model.Entity, output, tmpl st
 		}
 		log.Printf("formatting file %s error: %s", output, err)
 	}
+	names := []string{}
 
-	log.Printf("successfully generated %d models", len(entities))
+	for i, n := range entities {
+		names = append(names, n.GoName)
+		if i >= 3 {
+			break
+		}
+	}
+	fmt.Printf("[%s] Generated %d entitie(s): %30s\n", g.Name, len(entities), output)
 
 	return nil
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"html/template"
 
-	"github.com/LdDl/bungen/model"
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/model"
+	"github.com/ant31/bungen/util"
 )
 
 // TemplatePackage stores package info

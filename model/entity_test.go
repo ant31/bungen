@@ -3,7 +3,7 @@ package model
 import (
 	"testing"
 
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/util"
 )
 
 func TestTable_GoName(t *testing.T) {

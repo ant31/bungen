@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/util"
 )
 
 // Entity stores information about table

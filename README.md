@@ -1,7 +1,7 @@
 # Bungen - cli tool for generating Bun [Postgres driver] models
-Forked from: https://github.com/LdDl/bungen
+Forked from: https://github.com/ant31/bungen
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/LdDl/bungen)](https://goreportcard.com/report/github.com/LdDl/bungen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ant31/bungen)](https://goreportcard.com/report/github.com/ant31/bungen)
 
 About:
 * This tool has been adapted from Genna - https://github.com/dizzyfool/genna which has been made for [go-pg](https://github.com/go-pg/pg#postgresql-client-and-orm-for-golang) package. I think it will be cool to have same CLI but for [Bun](https://github.com/uptrace/bun#sql-first-golang-orm-for-postgresql-mysql-mssql-and-sqlite) which is new evolution of `go-pg`
@@ -20,7 +20,7 @@ In most of the cases Bun [Postgres driver] models represent database's tables an
 
 ### Usage
 
-1. Install `go get github.com/LdDl/bungen && go install github.com/LdDl/bungen@latest`
+1. Install `go get github.com/ant31/bungen && go install github.com/ant31/bungen@latest`
 1. Read though help `bungen -h`
 
 Currently bungen support 3 generators:

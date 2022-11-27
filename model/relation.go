@@ -3,7 +3,7 @@ package model
 import (
 	"strings"
 
-	"github.com/LdDl/bungen/util"
+	"github.com/ant31/bungen/util"
 )
 
 // Relation stores relation

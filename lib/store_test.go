@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/LdDl/bungen/model"
+	"github.com/ant31/bungen/model"
 	"github.com/uptrace/bun"
 )
 
