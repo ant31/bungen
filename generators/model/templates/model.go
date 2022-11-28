@@ -64,7 +64,7 @@ func (s *{{.GoName}}Search) Apply(query bun.QueryBuilder) bun.QueryBuilder { {{r
 	if !reflect.ValueOf(s.{{.GoName}}).IsNil(){ {{else}}
 	if s.{{.GoName}} != nil { {{end}}{{if .UseCustomRender}}
 		{{.CustomRender}}{{else}}
-		s.where(query, Tables.{{$model.GoName}}.{{if not $model.NoAlias}}Alias{{else}}Name{{end}}, Columns.{{$model.GoName}}.{{.GoName}}, s.{{.GoName}}){{end}}
+		s.where(query, {{$model.GoName}}T.Table.Name(), Columns.{{$model.GoName}}.{{.GoName}}, s.{{.GoName}}){{end}}
 	}{{end}}
 
 	s.apply(query)
