@@ -131,7 +131,8 @@ func EntityName(s string) string {
 func ColumnName(s string) string {
 	camelCased := CamelCased(Sanitize(s))
 	camelCased = ReplaceSuffix(ReplaceSuffix(camelCased, Id, ID), Ids, IDs)
-
+	camelCased = ReplaceSuffix(ReplaceSuffix(camelCased, "Url", "URL"), "Urls", "URLs")
+	camelCased = ReplaceSuffix(camelCased, "Ai", "AI")
 	return strings.Title(camelCased)
 }
 
